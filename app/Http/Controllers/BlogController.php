@@ -54,7 +54,7 @@ class BlogController extends Controller
 
         $blog = Blog::create($request->all());
         return response()->json([
-            'status' => false,
+            'status' => 1,
             'data' => $blog
             ], 201);
     }
@@ -62,12 +62,12 @@ class BlogController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Blog $blog)
+    public function show($blog)
     {
-        return [
-            'status'=>1,
-            'data'=> $blog
-        ];
+        return response()->json([
+            'status'=> 1,
+            'data'=> $blog,
+        ]);
     }
 
     /**
@@ -81,27 +81,38 @@ class BlogController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Blog $blog)
+    public function update(Request $request, $blog)
     {
-        $request->validate([
-            'title'=> 'required',
-            'body'=> 'required'
+        // $request->validate([
+        //     'title'=> 'required',
+        //     'body'=> 'required'
+        // ]);
+
+        $validatedData = Validator::make($request->all(), [
+            'title' => 'required',
+            'body' => 'required'
         ]);
+        if ($validatedData->fails()) {
+            return response()->json([
+                'status' => false,
+                'error' => $validatedData->errors(),
+            ], 401);
+        }
         $blog->title = $request->input('title');
         $blog->body = $request->input('body');
         $blog->update();
 
-        return [
-            'status'=>1,
-            'data'=>$blog,
-            'msg'=> 'Blog updated',
-        ];
+        return response()->json( [
+            'status' => 1,
+            'data' => $blog,
+            'msg' => 'Blog updated',
+        ], 201);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Blog $blog)
+    public function destroy($blog)
     {
         return [
             'status'=>1,
@@ -120,10 +131,10 @@ class BlogController extends Controller
         }
         // Delete
         $blog->delete();
-        return [
-            'status'=>1,
-            'data'=>$blog,
-            'msg'=>'blog deleted successfully'
-        ];
+        return response()->json([
+            'status' => 1,
+            'data' => $blog,
+            'msg' => 'blog deleted successfully'
+        ], 204);
     }
 }
